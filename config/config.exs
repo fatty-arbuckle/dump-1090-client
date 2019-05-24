@@ -8,6 +8,11 @@ use Mix.Config
 # if you want to provide default values for your application for
 # third-party users, it should be done in your "mix.exs" file.
 
+config :dump_1090_client,
+  address: "localhost",
+  port: 30003
+
+
 # You can configure your application as:
 #
 #     config :dump_1090_client, key: :value
