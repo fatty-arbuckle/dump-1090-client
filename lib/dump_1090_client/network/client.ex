@@ -82,9 +82,9 @@ defmodule Dump1090Client.Network.Client do
     state = %{
       host: '127.0.0.1',
       port: 30003,
-      max_retries: 10,
+      max_retries: 60,
       retry_interval: 1000,
-      retry_delay: 60000,
+      retry_delay: 30_000,
       failure_count: 0,
       connected: false,
       on_connect: fn state ->
