@@ -88,10 +88,10 @@ defmodule Dump1090Client.Network.Client do
       failure_count: 0,
       connected: false,
       on_connect: fn state ->
-        Logger.debug("tcp connect to #{state.host}:#{state.port}", ansi_color: :light_blue)
+        Logger.info("tcp connect to #{state.host}:#{state.port}", ansi_color: :light_blue)
       end,
       on_disconnect: fn state ->
-        Logger.debug("tcp disconnect from #{state.host}:#{state.port}", ansi_color: :light_blue)
+        Logger.info("tcp disconnect from #{state.host}:#{state.port}", ansi_color: :light_blue)
       end,
       on_retries_exceeded: fn state ->
         Logger.info("Max retries exceeded for #{state.host}:#{state.port}.")
