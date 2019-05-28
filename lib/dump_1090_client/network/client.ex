@@ -75,7 +75,8 @@ defmodule Dump1090Client.Network.Client do
   end
 
   def handle_info({:tcp_closed, _socket}, state) do
-    {:noreply, state}
+    Logger.error("tcp closed connection to #{state.host}:#{state.port}")
+    {:noreply, %{state | connected: false}}
   end
 
   defp opts_to_initial_state(opts) do
