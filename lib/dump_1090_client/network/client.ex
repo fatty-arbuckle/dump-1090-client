@@ -8,6 +8,7 @@ defmodule Dump1090Client.Network.Client do
 
   def init(opts) do
     state = opts_to_initial_state(opts)
+    IO.inspect(state, label: "inital state")
     connect(state)
   end
 
@@ -16,14 +17,15 @@ defmodule Dump1090Client.Network.Client do
   end
 
   defp connect(state) do
+    Logger.info("connecting to #{state.host}, #{state.port}")
     case :gen_tcp.connect(state.host, state.port, []) do
       {:ok, _socket} ->
         state.on_connect.(state)
         new_state = %{state | connected: true}
         {:ok, new_state}
-      {:error, _reason} ->
+      {:error, reason} ->
         new_state = %{state | failure_count: 1, connected: false}
-        new_state.on_disconnect.(new_state)
+        new_state.on_disconnect.(new_state, reason)
         {:ok, new_state, state.retry_interval}
     end
   end
@@ -62,10 +64,9 @@ defmodule Dump1090Client.Network.Client do
           new_state = %{state | failure_count: 0, connected: true}
           new_state.on_connect.(new_state)
           {:noreply, new_state}
-        {:error, _reason} ->
+        {:error, reason} ->
           new_state = %{state | failure_count: failure_count + 1, connected: false}
-          new_state.on_disconnect.(new_state)
-          :timer.sleep(state.retry_delay)
+          new_state.on_disconnect.(new_state, reason)
           {:noreply, new_state, state.retry_interval}
       end
     else
@@ -76,7 +77,9 @@ defmodule Dump1090Client.Network.Client do
 
   def handle_info({:tcp_closed, _socket}, state) do
     Logger.error("tcp closed connection to #{state.host}:#{state.port}")
-    {:noreply, %{state | connected: false}}
+    new_state = %{state | connected: false, failure_count: 0}
+    Kernel.send(self(), :timeout)
+    {:noreply, new_state}
   end
 
   defp opts_to_initial_state(opts) do
@@ -84,26 +87,25 @@ defmodule Dump1090Client.Network.Client do
       host: '127.0.0.1',
       port: 30003,
       max_retries: 60,
-      retry_interval: 60_000,
-      retry_delay: 1_000,
+      retry_interval: 1_000,
       failure_count: 0,
       connected: false,
       on_connect: fn state ->
         Logger.info("tcp connect to #{state.host}:#{state.port}", ansi_color: :light_blue)
       end,
-      on_disconnect: fn state ->
-        Logger.info("tcp disconnect from #{state.host}:#{state.port}", ansi_color: :light_blue)
+      on_disconnect: fn state, reason ->
+        Logger.info("tcp connection failure from #{state.host}:#{state.port} ==> #{reason}", ansi_color: :light_blue)
       end,
       on_retries_exceeded: fn state ->
-        Logger.info("Max retries exceeded for #{state.host}:#{state.port}.")
+        Logger.info("Max retries exceeded for #{state.host}:#{state.port}.", ansi_color: :red)
       end,
     }
 
-    state = update_value_if(state, opts, :host, "localhost")
+    state = update_value_if(state, opts, :host, "127.0.0.1")
     state = update_value_if(state, opts, :port, 30003)
     state = update_value_if(state, opts, :max_retries, 60)
-    state = update_value_if(state, opts, :retry_interval, 60_000)
-    state = update_value_if(state, opts, :retry_delay, 1_000)
+    state = update_value_if(state, opts, :retry_interval, 1_000)
+    state
   end
 
   defp update_value_if(state, opts, :host = key, default) do

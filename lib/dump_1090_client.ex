@@ -1,10 +1,8 @@
 defmodule Dump1090Client do
   require Logger
 
-  def start_listener() do    
-    # List all child processes to be supervised
+  def start_listener() do
     children = [
-      # {Dump1090Client.Network.Client, [host: "192.168.1.233", port: 30003]}
       {Dump1090Client.Network.Client, [
         host: Application.get_env(:dump_1090_client, :address),
         port: Application.get_env(:dump_1090_client, :port)
