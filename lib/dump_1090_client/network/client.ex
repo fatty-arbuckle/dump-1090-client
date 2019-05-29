@@ -99,37 +99,36 @@ defmodule Dump1090Client.Network.Client do
       end,
     }
 
-    state = if Keyword.has_key?(opts, :host) do
-      %{ state | host: Keyword.get(opts, :host, "localhost") |> String.to_charlist }
-    else
-      state
-    end
-
-    state = if Keyword.has_key?(opts, :port) do
-      %{ state | port: Keyword.fetch!(opts, :port) }
-    else
-      state
-    end
-
-    state = if Keyword.has_key?(opts, :max_retries) do
-      %{ state | max_retries: Keyword.fetch!(opts, :max_retries) }
-    else
-      state
-    end
-
-    state = if Keyword.has_key?(opts, :retry_interval) do
-      %{ state | retry_interval: Keyword.fetch!(opts, :retry_interval) }
-    else
-      state
-    end
-
-    state = if Keyword.has_key?(opts, :retry_delay) do
-      %{ state | retry_delay: Keyword.fetch!(opts, :retry_delay) }
-    else
-      state
-    end
-
-    state
+    state = update_value_if(state, opts, :host, "localhost")
+    state = update_value_if(state, opts, :port, 30003)
+    state = update_value_if(state, opts, :max_retries, 60)
+    state = update_value_if(state, opts, :retry_interval, 60_000)
+    state = update_value_if(state, opts, :retry_delay, 1_000)
   end
+
+  defp update_value_if(state, opts, :host = key, default) do
+    if Keyword.has_key?(opts, key) do
+      if Keyword.get(opts, key) != nil do
+        Map.put(state, key, Keyword.get(opts, key) |> String.to_charlist)
+      else
+        Map.put(state, key, default |> String.to_charlist)
+      end
+    else
+      state
+    end
+  end
+
+  defp update_value_if(state, opts, key, default) do
+    if Keyword.has_key?(opts, key) do
+      if Keyword.get(opts, key) != nil do
+        Map.put(state, key, Keyword.get(opts, key))
+      else
+        Map.put(state, key, default)
+      end
+    else
+      state
+    end
+  end
+
 
 end

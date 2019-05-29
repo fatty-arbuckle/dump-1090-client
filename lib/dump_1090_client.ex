@@ -1,6 +1,20 @@
 defmodule Dump1090Client do
   require Logger
 
+  def start_listener() do    
+    # List all child processes to be supervised
+    children = [
+      # {Dump1090Client.Network.Client, [host: "192.168.1.233", port: 30003]}
+      {Dump1090Client.Network.Client, [
+        host: Application.get_env(:dump_1090_client, :address),
+        port: Application.get_env(:dump_1090_client, :port)
+      ]}
+    ]
+
+    opts = [strategy: :one_for_one, name: Dump1090Client.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
   def replay_from_file(file_name, delay) do
     Task.async(fn ->
       File.stream!(file_name)

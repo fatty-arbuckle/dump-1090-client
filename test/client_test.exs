@@ -85,9 +85,18 @@ defmodule ClientTest do
     end
   end
 
-  test "application starts client" do
-    Dump1090Client.Application.start nil, nil
-    {:error, {:already_started, _pid}} = Dump1090Client.Network.Client.start_link []
+  # test "application starts client" do
+  #   Dump1090Client.Application.start nil, nil
+  #   {:error, {:already_started, _pid}} = Dump1090Client.Network.Client.start_link []
+  # end
+
+  test "client uses default when hostname and port are nil" do
+    {:ok, _client} = Dump1090Client.Network.Client.start_link [
+      host: nil,
+      port: nil
+    ]
+    assert %{address: "localhost:30003", connected: false}  == Dump1090Client.status()
+
   end
 
 
