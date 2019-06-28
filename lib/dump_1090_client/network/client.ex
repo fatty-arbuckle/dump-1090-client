@@ -8,7 +8,6 @@ defmodule Dump1090Client.Network.Client do
 
   def init(opts) do
     state = opts_to_initial_state(opts)
-    IO.inspect(state, label: "inital state")
     connect(state)
   end
 
@@ -26,7 +25,8 @@ defmodule Dump1090Client.Network.Client do
       {:error, reason} ->
         new_state = %{state | failure_count: 1, connected: false}
         new_state.on_disconnect.(new_state, reason)
-        {:ok, new_state, state.retry_interval}
+        Process.send_after(self(), :timeout, state.retry_interval)
+        {:ok, new_state}
     end
   end
 
@@ -58,6 +58,7 @@ defmodule Dump1090Client.Network.Client do
   end
 
   def handle_info(:timeout, state = %{failure_count: failure_count}) do
+    Logger.error("handling a timeout count #{failure_count} (retries #{state.max_retries})")
     if failure_count <= state.max_retries do
       case :gen_tcp.connect(state.host, state.port, []) do
         {:ok, _socket} ->
@@ -67,7 +68,9 @@ defmodule Dump1090Client.Network.Client do
         {:error, reason} ->
           new_state = %{state | failure_count: failure_count + 1, connected: false}
           new_state.on_disconnect.(new_state, reason)
-          {:noreply, new_state, state.retry_interval}
+          # Kernel.send(self(), :timeout)
+          Process.send_after(self(), :timeout, state.retry_interval)
+          {:noreply, new_state}
       end
     else
       state.on_retries_exceeded.(state)
@@ -78,13 +81,14 @@ defmodule Dump1090Client.Network.Client do
   def handle_info({:tcp_closed, _socket}, state) do
     Logger.error("tcp closed connection to #{state.host}:#{state.port}")
     new_state = %{state | connected: false, failure_count: 0}
-    Kernel.send(self(), :timeout)
+    # Kernel.send(self(), :timeout)
+    Process.send_after(self(), :timeout, state.retry_interval)
     {:noreply, new_state}
   end
 
   defp opts_to_initial_state(opts) do
     state = %{
-      host: '127.0.0.1',
+      host: 'localhost',
       port: 30003,
       max_retries: 60,
       retry_interval: 1_000,
@@ -101,7 +105,7 @@ defmodule Dump1090Client.Network.Client do
       end,
     }
 
-    state = update_value_if(state, opts, :host, "127.0.0.1")
+    state = update_value_if(state, opts, :host, "localhost")
     state = update_value_if(state, opts, :port, 30003)
     state = update_value_if(state, opts, :max_retries, 60)
     state = update_value_if(state, opts, :retry_interval, 1_000)
