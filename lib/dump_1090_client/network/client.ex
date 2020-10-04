@@ -45,11 +45,19 @@ defmodule Dump1090Client.Network.Client do
         0 ->
           nil
         _ ->
-          Phoenix.PubSub.broadcast(Aircraft.channel, Aircraft.raw_adsb_topic, {:raw, msg})
+          Tortoise.publish(
+            "dump_1090_client",
+            Aircraft.raw_adsb_topic,
+            msg)
           case Aircraft.ParseAdsb.parse(msg) do
             aircraft = %Aircraft{icoa: _icoa} ->
-              Phoenix.PubSub.broadcast(Aircraft.channel, Aircraft.update_topic, {:update, aircraft})
-            _ ->
+              {:ok, data} = JSON.encode(aircraft)
+              Tortoise.publish(
+                "dump_1090_client",
+                Aircraft.update_topic,
+                data
+              )
+            _whatever ->
               :ok
           end
       end

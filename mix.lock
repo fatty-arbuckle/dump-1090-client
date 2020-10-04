@@ -1,4 +1,6 @@
 %{
-  "adsb_parser": {:git, "https://github.com/fatty-arbuckle/adsb-parser.git", "91ae38893ff80d40723d4167d5561142e0a5e8a1", []},
-  "phoenix_pubsub": {:hex, :phoenix_pubsub, "1.1.2", "496c303bdf1b2e98a9d26e89af5bba3ab487ba3a3735f74bf1f4064d2a845a3e", [:mix], [], "hexpm"},
+  "adsb_parser": {:git, "https://github.com/fatty-arbuckle/adsb-parser.git", "41e93b3f06534a3664ad3a2b021c6892ad5a6e1f", []},
+  "gen_state_machine": {:hex, :gen_state_machine, "2.1.0", "a38b0e53fad812d29ec149f0d354da5d1bc0d7222c3711f3a0bd5aa608b42992", [:mix], [], "hexpm", "ae367038808db25cee2f2c4b8d0531522ea587c4995eb6f96ee73410a60fa06b"},
+  "json": {:hex, :json, "1.3.0", "2c6bac5303713d1b43ca6f3c881767f57b2adf668cde3013bd7157dc65ef299c", [:mix], [], "hexpm", "8bce413fb25234e46e61f363a36ad07dcce53227982dc64e2721b6e40eda7981"},
+  "tortoise": {:hex, :tortoise, "0.9.4", "3bca5f4475f80a5bd45aab644ddb3364dd0956b67f4202dcef6ed20e045ea3a6", [:mix], [{:gen_state_machine, "~> 2.0", [hex: :gen_state_machine, repo: "hexpm", optional: false]}], "hexpm", "d5c00d7c2329016376181e19f18116a10fc65691bd96b08e5b726ca050d10094"},
 }

@@ -24,7 +24,9 @@ defmodule Dump1090Client.MixProject do
   defp deps do
     [
       {:adsb_parser, git: "https://github.com/fatty-arbuckle/adsb-parser.git"},
-      {:phoenix_pubsub, ">= 1.1.0"}
+      # {:adsb_parser, path: "../adsb-parser"},
+      {:tortoise, "~> 0.9"},
+      {:json, "~> 1.3"}
     ]
   end
 

@@ -2,8 +2,8 @@ defmodule ClientTest do
   use ExUnit.Case, async: false
 
   test "that client connects and broadcasts messages" do
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.raw_adsb_topic
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.update_topic
+    # Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.raw_adsb_topic
+    # Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.update_topic
     server = Task.async(fn ->
       {:ok, listener} = :gen_tcp.listen(30123, [packet: :line, active: false, reuseaddr: true])
       {:ok, socket} = :gen_tcp.accept(listener, 5000)
@@ -29,8 +29,8 @@ defmodule ClientTest do
   end
 
   test "that client connects after failing first" do
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.raw_adsb_topic
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.update_topic
+    # Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.raw_adsb_topic
+    # Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.update_topic
     {:ok, _client} = Dump1090Client.Network.Client.start_link [
       host: "localhost",
       port: 30998,

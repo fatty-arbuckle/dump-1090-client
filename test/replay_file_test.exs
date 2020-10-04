@@ -2,8 +2,6 @@ defmodule ReplayFileTest do
   use ExUnit.Case, async: true
 
   test "reply from file" do
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.raw_adsb_topic
-    Phoenix.PubSub.subscribe Aircraft.channel, Aircraft.update_topic
 
     Dump1090Client.replay_from_file "./test/data/replay_file", 0
 
